@@ -7,6 +7,10 @@ import ftplib
 import requests
 from . import models
 
+
+'''
+    ---------------------------------- Functions Configurations ----------------------------------
+'''
 if settings.DEBUG:
     host = '127.0.0.1:8000'
     url = 'http://{}/media/json'.format(host)
@@ -31,7 +35,10 @@ def load_json(data):
     try:
         data = json.loads(data)
     except:
-        data = []
+        try:
+            data = json.load(data)
+        except:
+            data = data
 
     return data
 
@@ -42,11 +49,14 @@ def method_not_allowed():
         'containers': {}
     }
 
+
+'''
+    ---------------------------------- Functions website view client ----------------------------------
+'''
 def signin(data, request):
     data = load_json(data)
     username = data['username']
     password = data['password']
-    print(data)
     user = authenticate(username=username, password=password)
     if user is not None:
         loginProcess(request, user)
@@ -208,7 +218,6 @@ def delete_client(data):
 
 def api_get_clients(data):
     data = load_json(data)
-    print(data)
     cpf = data['cpf']
     if cpf != '':
         if models.Clients.objects.filter(cpf=cpf).exists():
@@ -273,3 +282,442 @@ def authorized_app(data):
     }
 
 
+'''
+    ---------------------------------- Functions API greyhounds and races ----------------------------------
+'''
+# Functions to manage greyhound
+def is_greyhound_already_registered(data):
+    data = load_json(data)
+    if data['id'] != '' and data['id'] != None:
+        _id = int(data['id'])
+        greyhounds = models.Greyhound.objects.filter(id=_id)
+        if greyhounds.exists():
+            greyhound = greyhounds[0]
+            status = True
+            message = 'Greyhound successfully found'
+            containers = {
+                'its-possible-register': False,
+                'id': _id,
+                'name': greyhound.name,
+                'type-greyhound': greyhound.type_greyhound,
+                'gender': greyhound.gender,
+                'color': greyhound.color,
+                'birth_date': greyhound.birth_date
+            }
+        else:
+            status = False
+            message = 'This greyhound is not in our database'
+            containers = {
+                'its-possible-register': True,
+            }
+    else:
+        status = False
+        message = 'Error in the Galgo query, inform at least the ID'
+        containers = {
+            'its-possible-register': False,
+            'why': 'You need to pass greyhound ID'
+        }
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def filters_greyhounds(data):
+    data = load_json(data)
+    try:
+        if data['criteria'] == '*':
+            greyhounds = models.Greyhound.objects.all()
+        elif data['criteria'] is not None:
+            greyhounds = models.Greyhound.objects.filter(**{data['model']: data['criteria']})
+        else:
+            return {
+                'status': False,
+                'message': 'Invalid criteria provided',
+                'containers': {}
+            }
+        
+        results = []
+        if len(greyhounds) >0:
+            for greyhound in greyhounds:
+                results.append({
+                    'id': greyhound.id,
+                    'name': greyhound.name,
+                    'type-greyhound': greyhound.type_greyhound,
+                    'gender': greyhound.gender,
+                    'color': greyhound.color,
+                    'birth_date': greyhound.birth_date
+                })
+
+            status = True
+            message = 'Greyhounds retrieved successfully'
+            containers = {'greyhounds': results}
+        else:
+            status = False
+            message = 'Greyhounds not finded'
+            containers = {'greyhounds': results}
+    except Exception as e:
+        status = False
+        message = f'Error retrieving greyhounds: {str(e)}'
+        containers = {}
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def create_new_greyhound(data):
+    data = load_json(data)
+    is_permited_create = is_greyhound_already_registered(data)
+    if is_permited_create['status'] is False and is_permited_create['containers']['its-possible-register'] is True:
+        try:
+            new_greyhound = models.Greyhound.objects.create(
+                id=int(data['id']),
+                name=data['name'],
+                type_greyhound=data['type_greyhound'],
+                gender=data['gender'],
+                gender_abbreviation=data['gender-abbreviation'],
+                color=data['color'],
+                color_abbreviation=data['color-abbreviation'],
+                birth_date=data['birth_date'],
+                birth_year=data['birth-year'],
+                birth_month=data['birth-month'],
+                birth_day=data['birth-day'],
+                dam_name=data['dam-name'],
+                sire_name=data['sire-name']
+            )
+            status = True
+            message = 'Greyhound created successfully'
+            containers = {
+                'id': new_greyhound.id,
+                'name': new_greyhound.name,
+                'type-greyhound': new_greyhound.type_greyhound,
+                'gender': new_greyhound.gender,
+                'color': new_greyhound.color,
+                'birth_date': new_greyhound.birth_date
+            }
+        except Exception as e:
+            status = False
+            message = f'Error creating greyhound: {str(e)}'
+            containers = {}
+    else:
+        status = is_permited_create['status']
+        message = is_permited_create['message']
+        containers = is_permited_create['containers']
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+# Functions to manage Race
+def create_race(data):
+    data = load_json(data)
+    greyhound_id = data['greyhound_id']
+    greyhound = is_greyhound_already_registered({'id': greyhound_id})
+    if greyhound['status']:
+        race_greyhound = '{}-{}'.format(data['race_id'], greyhound_id)
+        response_races = filter_races({
+            'models': 'race_greyhound',
+            'criteria': race_greyhound
+        })
+        if response_races['status'] is False:
+            race = models.Races.objects.create(
+            race_id = data['race_id'],
+            race_greyhound=race_greyhound,
+            id_greyhound=greyhound_id,
+            greyhound=models.Greyhound.objects.get(id=greyhound_id),
+            avaible=data['avaible'],
+            avaible_calculate=False,
+            race_date=data['race_date'],
+            uk_time=data['uk_time'],
+            br_time=data['br_time'],
+            track=data['track'],
+            category=data['category'],
+            subcategory=data['subcategory'],
+            distance=data['distance'],
+            weight=data['weight'],
+            trap=data['trap'],
+            post_pick_racing_post=data['post_pick_racing_post'],
+            rpr=data['rpr'],
+            timeform_prediction=data['timeform_prediction'],
+            timeform_stars=data['timeform_stars'],
+            result=data['result'],
+            course=data['course'],
+            observations=data['observations'],
+            odd_back=data['odd_back'],
+            odd_lay=data['odd_lay'],
+            num_greyhounds=data['num_greyhounds'],
+            start=data['start'],
+            final_time=data['final_time']
+        )
+            race.save()
+            status =  True
+            message = 'Race created successfully'
+            containers = {
+                'race_id':data['race_id']
+            }
+        else:
+            status = False
+            message = 'Está corrida já foi criada anteriormente'
+            containers = {}
+    else:
+        status = greyhound['status']
+        message = greyhound['message']
+        containers = greyhound['containers']
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def filter_races(data):
+    data = load_json(data)
+    try:
+        ascending = True
+        if data['criteria'] == '*':
+            races = models.Races.objects.all().order_by(f'{"" if ascending else "-"}race_date')
+        elif data['model'] == 'greyhound':
+            greyhound = models.Greyhound.objects.get(id=data['criteria'])
+            races = models.Races.objects.filter(greyhound=greyhound).order_by(f'{"" if ascending else "-"}race_date')
+        elif data['criteria'] is not None:
+            races = models.Races.objects.filter(**{data['model']: data['criteria']}).order_by(f'{"" if ascending else "-"}race_date')
+        else:
+            return {
+                'status': False,
+                'message': 'Criterio inválido',
+                'containers': {}
+            }
+
+        results = []
+        for race in races:
+            results.append({
+                'id': race.id,
+                'race_id': race.race_id,
+                'race_greyhound': race.race_greyhound,
+                'greyhound_id': race.greyhound.id,
+                'avaible': race.avaible,
+                'avaible_calculate': race.avaible_calculate,
+                'race_date': race.race_date,
+                'uk_time': race.uk_time,
+                'br_time': race.br_time,
+                'track': race.track,
+                'category': race.category,
+                'subcategory': race.subcategory,
+                'distance': race.distance,
+                'trap': race.trap,
+                'post_pick_racing_post': race.post_pick_racing_post,
+                'rpr': race.rpr,
+                'timeform_prediction': race.timeform_prediction,
+                'timeform_stars': race.timeform_stars,
+                'result': race.result,
+                'course': race.course,
+                'observations': race.observations,
+                'odd_back': race.odd_back,
+                'odd_lay': race.odd_lay,
+                'num_greyhounds': race.num_greyhounds,
+                'start': race.start,
+                'final_time': race.final_time,
+            })
+
+        if len(results) > 0:
+            status = True
+            message = 'As corridas foram encontrada com sucesso!'
+            containers = {'races': results}
+        else:
+            status = False
+            message = 'Nenhuma corrida encontra com esse critério: {}'.format(data['criteria'])
+            containers = {}
+    except Exception as e:
+        status = False
+        message = f'Error retrieving races: {str(e)}'
+        containers = {}
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def update_result_race(data):
+    data = load_json(data)
+    race = models.Races.objects.get(**{data['model']: data['criteria']})
+
+    race.avaible = data['avaible']
+    race.result = data['result']
+    race.course = data['course']
+    race.observations = data['observation']
+    race.trap = data['trap']
+    race.start = data['start']
+    race.final_time = data['final']
+    race.num_greyhounds = data['numGreyhounds']
+    race.save()
+
+    status = True
+    message = 'As corridas foram atualizadas corretamente!'
+    containers = {}
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def remove_race(data):
+    data = load_json(data)
+    races = models.Races.objects.filter(**{data['model']: data['criteria']})
+    for race in races:
+        race.delete()
+    status = True
+    message = 'A corrida do dia com id {} foi removidas com sucesso!'.format(data['criteria'])
+    return {
+        'status': status,
+        'message': message,
+        'containers': {}
+    }
+
+def calculate_races(data):
+    data = load_json(data)
+    races = models.Races.objects.filter(id=data['id'])
+    if races.exists():
+        race = races[0]
+        race.avaible_calculate = True
+        race.recovery = data['recovery']
+        race.brt = data['brt']
+        race.best_time = data['best_time']
+        race.last_time = data['last_time']
+        race.avg_time = data['avg_time']
+        race.bet_start = data['best_start']
+        race.last_start = data['last_start']
+        race.avg_start = data['avg_start']
+        race.last_recovery = data['last_recovery']
+        race.avg_recovery = data['avg_recovery']
+        race.save()
+
+        status = True
+        message = 'Calculos salvos com sucesso!'
+    else:
+        status = False
+        message = 'Corrida não pode ser encontrada com esse ID'
+
+    return{
+        'sttus': status,
+        'message': message,
+        'containers': {}
+    }
+
+def filter_races_day(data):
+    data = load_json(data)
+    if 'contains' not in data:
+        data['contains'] = False
+
+    if data['criteria'] == '*':
+        races = models.racesDay.objects.all().order_by(data['model'])
+    elif data['criteria'] is not None:
+        if data['contains']:
+            races = models.racesDay.objects.filter(**{data['model'] + '__contains': data['criteria']}).order_by(data['model'])
+        else:
+            races = models.racesDay.objects.filter(**{data['model']: data['criteria']}).order_by(data['model'])
+    else:
+        return {
+            'status': False,
+            'message': 'Invalid criteria provided',
+            'containers': {}
+        }
+
+    results = []
+    for race in races:
+        results.append({
+            'race_id': race.race_id,
+            'race_tittle': race.race_title,
+            'track_id': race.track_id,
+            'main_title': race.main_title,
+            'race_date': race.race_date
+        })
+
+    if len(results) > 0:
+        status = True
+        message = 'As corridas do dia foram encontrada com sucesso!'
+        containers = {'races': results}
+    else:
+        status = False
+        message = 'Nenhuma corrida encontra com esse critério: {}'.format(data['criteria'])
+        containers = {}
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def create_races_day(data):
+    data = load_json(data)
+    log_batch = {}
+    if data['its-batch']:
+        for batch in data['batchs']:
+            response = filter_races_day({
+                'model': 'race_id',
+                'criteria': batch['raceId']
+            })
+            response_race = filter_races({'race_id': batch['raceId']})
+            if response['status'] is False and response_race['status'] is False:
+                race_day = models.racesDay.objects.create(
+                    race_id = batch['raceId'],
+                    race_title = batch['raceTitle'],
+                    track_id = batch['trackId'],
+                    track_name = batch['trackName'],
+                    main_title = data['title'],
+                    race_date = batch['raceDate']
+                )
+                race_day.save()
+                log_batch[batch['raceId']] = True
+            else:
+                log_batch[batch['raceId']] = False
+    else:
+        race_day = models.racesDay.objects.create(
+            race_id = batch['raceId'],
+            race_title = batch['raceTitle'],
+            track_id = batch['trackId'],
+            track_name = batch['trackName'],
+            main_title = data['title'],
+            race_date = batch['raceDate']
+        )
+        race_day.save()
+        log_batch[batch['raceId']] = True
+
+    return{
+        'status': True,
+        'message': 'Dados da carridas diárias foram salvas com sucesso!',
+        'containers': {
+            'log_batch': log_batch
+        }
+    }
+
+def remove_races_day(data):
+    data = load_json(data)
+    status = False
+    message = 'Nenhuma corrida do dia encontrada com o critério fornecido'
+    if data['criteria'] == '*':
+        models.racesDay.objects.all().delete()
+        status = True
+        message = 'Todas as corridas do dia foram removidas com sucesso!'
+    elif data['criteria'] is not None:
+        races_day = filter_races_day(data)
+        if races_day['status']:
+            if len(races_day['containers']['races']) > 0:
+                status = True
+                message = 'A corrida do dia com id {} foi removidas com sucesso!'.format(data['criteria'])
+                for race in races_day['containers']['races']:
+                    race_obj = models.racesDay.objects.get(race_id=race['race_id'])
+                    race_obj.delete() 
+    else:
+        status = False
+        message = 'Critério inválido fornecido'
+    return {
+        'status': status,
+        'message': message,
+        'containers': {}
+    }

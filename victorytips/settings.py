@@ -30,7 +30,6 @@ SECRET_KEY = 'django-insecure-j4+@a(n%_&3#ivj@fsvp#@xm!pgvv0+e)yfy@%78^cs@$0diz7
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'professordocassino-production.up.railway.app',
     '127.0.0.1'
 ]
 
@@ -96,9 +95,9 @@ DATABASES = {
        'ENGINE': 'django.db.backends.postgresql',
        'NAME': 'railway',
        'USER': 'postgres',
-       'PASSWORD': '3AcIFP5aakEdFjRtgjWm',
-       'HOST': 'containers-us-west-59.railway.app',
-       'PORT': '5615',
+       'PASSWORD': 'YaN01JGbjz0Cd808RSMN',
+       'HOST': 'containers-us-west-56.railway.app',
+       'PORT': '6736',
    }
 }
 

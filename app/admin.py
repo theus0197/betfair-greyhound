@@ -1,8 +1,19 @@
 from django.contrib import admin
-from . import models
+from .models import Greyhound, Races, racesDay  # Importe seus modelos aqui
 
-# Register your models here.
-class ClientsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'cpf', 'email', 'roleta', 'dados', 'football')
+class GreyhoundAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'type_greyhound', 'gender', 'gender_abbreviation', 'color', 'color_abbreviation', 'birth_date', 'birth_year', 'birth_month', 'birth_day', 'dam_name', 'sire_name')
+    # Adicione outros campos conforme necessário
 
-admin.site.register(models.Clients, ClientsAdmin)
+class RacesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'race_id', 'race_greyhound', 'id_greyhound', 'greyhound', 'avaible', 'race_date', 'uk_time', 'br_time', 'track', 'category', 'result')
+    # Adicione outros campos conforme necessário
+
+class RacesDayAdmin(admin.ModelAdmin):
+    list_display = ('race_id', 'race_title', 'track_id', 'track_name', 'main_title', 'race_date')
+    # Adicione outros campos conforme necessário
+
+# Registre os modelos no admin
+admin.site.register(Greyhound, GreyhoundAdmin)
+admin.site.register(Races, RacesAdmin)
+admin.site.register(racesDay, RacesDayAdmin)

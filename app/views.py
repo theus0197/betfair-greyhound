@@ -4,7 +4,9 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from . import controller
 
-# Create your views here.
+'''
+    ---------------------------------- Website view client ----------------------------------
+'''
 def index(request):
     if request.user.is_authenticated:
         auth = {
@@ -93,22 +95,117 @@ def delete_client(request):
         response = controller.method_not_allowed()
     return JsonResponse(response)
 
+
+'''
+    ---------------------------------- API Greyhounds ----------------------------------
+'''    
 @csrf_exempt
-def api_get_clients(request):
+def greyhounds_profile_get(request):
     if request.method == 'POST':
         data = request.body.decode('utf-8')
-        response = controller.api_get_clients(data)
+        response = controller.is_greyhound_already_registered(data)
         return JsonResponse(response)
     else:
         response = controller.method_not_allowed()
-    return JsonResponse(response)
+        return JsonResponse(response)    
 
 @csrf_exempt
-def api_get_game(request):
+def greyhounds_profile_filter(request):
     if request.method == 'POST':
         data = request.body.decode('utf-8')
-        response = controller.authorized_app(data)
+        response = controller.filters_greyhounds(data)
         return JsonResponse(response)
     else:
         response = controller.method_not_allowed()
-    return JsonResponse(response)
+        return JsonResponse(response)    
+
+@csrf_exempt
+def greyhounds_new(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.create_new_greyhound(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+   
+
+@csrf_exempt
+def races_day_filter(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.filter_races_day(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def races_day_new(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.create_races_day(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def races_day_remove(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.remove_races_day(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+
+@csrf_exempt
+def races_new(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.create_race(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def races_filter(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.filter_races(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def race_update(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.update_result_race(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def race_calculates(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.calculate_races(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def race_delete(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.remove_race(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
