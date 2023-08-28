@@ -33,6 +33,10 @@ body, html{
 .no-select{
     user-select: none;
 }
+#logo{
+    width:27rem;
+    height: auto;
+}
 
 a{
     text-decoration: none;
