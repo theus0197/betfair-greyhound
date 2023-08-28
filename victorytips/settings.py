@@ -30,7 +30,8 @@ SECRET_KEY = 'django-insecure-j4+@a(n%_&3#ivj@fsvp#@xm!pgvv0+e)yfy@%78^cs@$0diz7
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1'
+    '127.0.0.1',
+    'betfair-greyhound-production.up.railway.app'
 ]
 
 
