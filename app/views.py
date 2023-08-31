@@ -9,6 +9,7 @@ from . import controller
 '''
 def index(request):
     if request.user.is_authenticated:
+        #controller.remove_data()
         auth = {
             'user': request.user.username
         }
@@ -201,10 +202,52 @@ def race_calculates(request):
         return JsonResponse(response)
     
 @csrf_exempt
+def save_odds(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.save_odds(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
 def race_delete(request):
     if request.method == 'POST':
         data = request.body.decode('utf-8')
         response = controller.remove_race(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+
+
+@csrf_exempt
+def delete_info_history(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.delete_info_history(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+
+@csrf_exempt
+def new_info_history(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.new_info_history(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def filter_info_history(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.filter_info_history(data)
         return JsonResponse(response)
     else:
         response = controller.method_not_allowed()

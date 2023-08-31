@@ -11,6 +11,11 @@ from . import models
 '''
     ---------------------------------- Functions Configurations ----------------------------------
 '''
+def remove_data():
+    models.Races.objects.all().delete()
+    models.collectHistoryDay.objects.all().delete()
+    models.racesDay.objects.all().delete()
+
 if settings.DEBUG:
     host = '127.0.0.1:8000'
     url = 'http://{}/media/json'.format(host)
@@ -431,7 +436,7 @@ def create_race(data):
             id_greyhound=greyhound_id,
             greyhound=models.Greyhound.objects.get(id=greyhound_id),
             avaible=data['avaible'],
-            avaible_calculate=False,
+            avaible_calculate=data['avaible_calculate'],
             race_date=data['race_date'],
             uk_time=data['uk_time'],
             br_time=data['br_time'],
@@ -452,7 +457,8 @@ def create_race(data):
             odd_lay=data['odd_lay'],
             num_greyhounds=data['num_greyhounds'],
             start=data['start'],
-            final_time=data['final_time']
+            final_time=data['final_time'],
+            brt=data['brt']
         )
             race.save()
             status =  True
@@ -521,6 +527,7 @@ def filter_races(data):
                 'num_greyhounds': race.num_greyhounds,
                 'start': race.start,
                 'final_time': race.final_time,
+                'brt': race.brt
             })
 
         if len(results) > 0:
@@ -544,15 +551,15 @@ def filter_races(data):
 
 def update_result_race(data):
     data = load_json(data)
-    race = models.Races.objects.get(**{data['model']: data['criteria']})
-
+    race = models.Races.objects.filter(**{data['model']: data['criteria']})[0]
     race.avaible = data['avaible']
+    race.avaible_calculate = data['avaibleResult']
     race.result = data['result']
     race.course = data['course']
-    race.observations = data['observation']
-    race.trap = data['trap']
-    race.start = data['start']
-    race.final_time = data['final']
+    race.observations = data['observation'] if data['observation'] != 'passed' else race.observations
+    race.trap = data['trap'] if data['trap'] != 'passed' else race.trap
+    race.start = data['start'] if data['start'] != 'passed' else race.start
+    race.final_time = data['final'] if data['final'] != 'passed' else race.final_time
     race.num_greyhounds = data['numGreyhounds']
     race.save()
 
@@ -581,24 +588,60 @@ def remove_race(data):
 
 def calculate_races(data):
     data = load_json(data)
-    races = models.Races.objects.filter(id=data['id'])
+    races = models.Races.objects.filter(race_greyhound=data['race_greyhound'])
     if races.exists():
         race = races[0]
         race.avaible_calculate = True
         race.recovery = data['recovery']
-        race.brt = data['brt']
+        race.avg_position = data['avg_position']
         race.best_time = data['best_time']
         race.last_time = data['last_time']
         race.avg_time = data['avg_time']
-        race.bet_start = data['best_start']
+        race.best_start = data['best_start']
         race.last_start = data['last_start']
         race.avg_start = data['avg_start']
         race.last_recovery = data['last_recovery']
         race.avg_recovery = data['avg_recovery']
+        race.overall_recovery = data['ranking_recovery']
+        race.overall_brt = data['ranking_brt']
+        race.overall_avg_position = data['ranking_avg_position']
+        race.overall_best_time = data['ranking_best_time']
+        race.overall_last_time = data['ranking_last_time']
+        race.overall_avg_time = data['ranking_avg_time']
+        race.overall_best_start = data['ranking_best_start']
+        race.overall_last_start = data['ranking_last_start']
+        race.overall_avg_start = data['ranking_avg_start']
+        race.overall_last_recovery = data['ranking_last_recovery']
+        race.overall_avg_recovery = data['ranking_avg_recovery']
+        race.overall = data['overall']
+        race.gb_favorite = data['gb_favorite']
+
         race.save()
 
         status = True
         message = 'Calculos salvos com sucesso!'
+    else:
+        status = False
+        message = 'Corrida não pode ser encontrada com esse ID'
+
+    return{
+        'sttus': status,
+        'message': message,
+        'containers': {}
+    }
+
+def save_odds(data):
+    data = load_json(data)
+    print(data)
+    races = models.Races.objects.filter(race_greyhound=data['race_greyhound'])
+    if races.exists():
+        race = races[0]
+        race.odd_back = data['odd_back']
+        race.odd_lay = data['odd_lay']
+        race.save()
+
+        status = True
+        message = 'ODDS salva com sucesso!'
     else:
         status = False
         message = 'Corrida não pode ser encontrada com esse ID'
@@ -716,6 +759,101 @@ def remove_races_day(data):
     else:
         status = False
         message = 'Critério inválido fornecido'
+    return {
+        'status': status,
+        'message': message,
+        'containers': {}
+    }
+
+
+def new_info_history(data):
+    data = load_json(data)
+    response_history = filter_info_history({
+        'models': 'fake_id',
+        'criteria': data['fake_id']
+    })
+    if response_history['status'] is False:
+        item = models.collectHistoryDay.objects.create(
+            id=data['fake_id'],
+            fake_id=data['fake_id'],
+            greyhound=models.Greyhound.objects.get(id=data['fake_id']),
+            last_refresh=data['last_refresh'],
+            len_history=data['len_history']
+        )
+        item.save()
+        status =  True
+        message = 'Historico foi criado com sucesso!'
+        containers = {
+            'history_id': item.id
+        }
+    else:
+        status = False
+        message = 'Historico já foi criado anteriormente!'
+        containers = {}
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def filter_info_history(data):
+    data = load_json(data)
+    try:
+        ascending = True
+        if data['criteria'] == '*':
+            items = models.collectHistoryDay.objects.all().order_by(f'{"" if ascending else "-"}last_refresh')
+        elif data['criteria'] is not None:
+            items = models.collectHistoryDay.objects.filter(**{data['model']: data['criteria']}).order_by(f'{"" if ascending else "-"}last_refresh')
+        else:
+            return {
+                'status': False,
+                'message': 'Criterio inválido',
+                'containers': {}
+            }
+
+        results = []
+        for item in items:
+            results.append({
+                'id': item.id,
+                'fake_id': item.fake_id,
+                'last_refresh': item.last_refresh,
+                'len_history': item.len_history
+            })
+
+        if len(results) > 0:
+            status = True
+            message = 'Os historicos foram encontrada com sucesso!'
+            containers = {'history': results}
+        else:
+            status = False
+            message = 'Nenhum historico encontrado com esse critério: {}'.format(data['criteria'])
+            containers = {}
+    except Exception as e:
+        status = False
+        message = f'Error retrieving history: {str(e)}'
+        containers = {}
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }
+
+def delete_info_history(data):
+    data = load_json(data)
+    if data['criteria'] == '*':
+        races = models.collectHistoryDay.objects.all()
+    else:
+        races = models.collectHistoryDay.objects.filter(**{data['model']: data['criteria']})
+    
+    for race in races:
+        race.delete()
+
+    status = True
+    if data['criteria'] == '*':
+        message = 'Todas as corridas foram removidas com sucesso!'
+    else:
+        message = 'A corrida do dia com id {} foi removidas com sucesso!'.format(data['criteria'])
     return {
         'status': status,
         'message': message,

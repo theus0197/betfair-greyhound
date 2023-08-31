@@ -25,6 +25,10 @@ urlpatterns = [
     path('api/v1/races/filter', views.races_filter, name='greyhounds_profile_filter'),
     path('api/v1/race/update', views.race_update, name='greyhounds_profile_update'),
     path('api/v1/race/calculates', views.race_calculates),
+    path('api/v1/race/save/odd', views.save_odds),
     path('api/v1/race/delete', views.race_delete, name='greyhounds_profile_delete'),
 
+    path('api/v1/history/info/new', views.new_info_history),
+    path('api/v1/history/info/filter', views.filter_info_history),
+    path('api/v1/history/info/delete', views.delete_info_history)
 ]

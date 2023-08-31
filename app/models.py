@@ -69,18 +69,19 @@ class Races(models.Model):
     avg_recovery = models.CharField(max_length=50, blank=True)  # Recup Média
     fav_odd_back = models.CharField(max_length=10)  # Fav Odd Back
     fav_odd_lay = models.CharField(max_length=10)  # Fav Odd Lay
-    overall_recovery = models.CharField(max_length=50, blank=True) # Overall Recuperação
-    overall_brt = models.CharField(max_length=50, blank=True)  # Overall BRT
-    overall_avg_position = models.CharField(max_length=10)  # Overall Média Posição
-    overall_best_time = models.CharField(max_length=50, blank=True)  # Overall Melhor tempo
-    overall_last_time = models.CharField(max_length=50, blank=True)  # Overall Último Tempo
-    overall_avg_time = models.CharField(max_length=50, blank=True)  # Overall Média Tempo
-    overall_best_start = models.CharField(max_length=50, blank=True)  # Overall Melhor largada
-    overall_last_start = models.CharField(max_length=50, blank=True)  # Overall Ultima Largada
-    overall_avg_start = models.CharField(max_length=50, blank=True)  # Overall Média Largada
-    overall_last_recovery = models.CharField(max_length=50, blank=True)  # Overall Ultima Recup
-    overall_avg_recovery = models.CharField(max_length=50, blank=True)  # Overall Recup Média
-    gb_favorite = models.BooleanField(null=True, blank=True)  # Favorito GB (Great Britain)
+    overall_recovery = models.CharField(max_length=550, blank=True) # Overall Recuperação
+    overall_brt = models.CharField(max_length=550, blank=True)  # Overall BRT
+    overall_avg_position = models.CharField(max_length=550)  # Overall Média Posição
+    overall_best_time = models.CharField(max_length=550, blank=True)  # Overall Melhor tempo
+    overall_last_time = models.CharField(max_length=550, blank=True)  # Overall Último Tempo
+    overall_avg_time = models.CharField(max_length=550, blank=True)  # Overall Média Tempo
+    overall_best_start = models.CharField(max_length=550, blank=True)  # Overall Melhor largada
+    overall_last_start = models.CharField(max_length=550, blank=True)  # Overall Ultima Largada
+    overall_avg_start = models.CharField(max_length=550, blank=True)  # Overall Média Largada
+    overall_last_recovery = models.CharField(max_length=550, blank=True)  # Overall Ultima Recup
+    overall_avg_recovery = models.CharField(max_length=550, blank=True)  # Overall Recup Média
+    overall = models.CharField(max_length=550, blank=True)
+    gb_favorite = models.CharField(max_length=550, blank=True)  # Favorito GB (Great Britain)
 
     def __str__(self):
         return f"{self.race_date} - {self.track}"
@@ -104,3 +105,17 @@ class racesDay(models.Model):
     class Meta:
         verbose_name = 'RaceDay'
         verbose_name_plural = 'RacesDay'
+
+class collectHistoryDay(models.Model):
+    id = models.IntegerField(primary_key=True)
+    fake_id = models.CharField(max_length=50, default='')
+    greyhound = models.ForeignKey(Greyhound, on_delete=models.CASCADE)
+    last_refresh = models.DateField()
+    len_history = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.greyhound_id} - {self.last_refresh}"
+
+    class Meta:
+        verbose_name = 'collectHistoryDay'
+        verbose_name_plural = 'collectHistoryDay'
