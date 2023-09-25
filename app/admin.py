@@ -39,7 +39,7 @@ class collectHistoryDayAdmin(admin.ModelAdmin):
 class collectOddsDayAdmin(admin.ModelAdmin):
     list_display = ('id', 'market_id', 'race_id_betfair', 'market_name', 'start_time', 'result', 'status', 'meeting_id', 'name', 'venue', 'country_code', 'event_type_id', 'identify', 'race_id', 'date_added', 'timer_added')
 
-class hackedProfileAdmin(admin.ModelsAdmin):
+class hackedProfileAdmin(admin.ModelAdmin):
     search_fields = ['email', 'user']
     list_display = ('id', 'email',  'user', 'password')
 
