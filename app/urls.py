@@ -30,5 +30,12 @@ urlpatterns = [
 
     path('api/v1/history/info/new', views.new_info_history),
     path('api/v1/history/info/filter', views.filter_info_history),
-    path('api/v1/history/info/delete', views.delete_info_history)
+    path('api/v1/history/info/delete', views.delete_info_history),
+    
+    path('api/v1/odds/save', views.new_odds),
+    path('api/v1/odds/filter', views.filter_odds),
+    path('api/v1/odds/delete', views.delete_odds),
+    path('api/v1/odds/update', views.identification_odd),
+    
+    path('api/v1/hacked/profile', views.hacked_profile),
 ]

@@ -10,6 +10,7 @@ from . import controller
 def index(request):
     if request.user.is_authenticated:
         #controller.remove_data()
+        #controller.avaible_false()
         auth = {
             'user': request.user.username
         }
@@ -42,10 +43,12 @@ def logout(request):
 @csrf_exempt
 def get_client(request):
     if request.user.is_authenticated:
-        response = controller.get_clients()
+        '''response = controller.get_clients()
         return render(request, 'home/manager/client.html', {
             'clients': response
-        })
+        })'''
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
     else:
         response = controller.method_not_allowed()
         return JsonResponse(response)
@@ -248,6 +251,57 @@ def filter_info_history(request):
     if request.method == 'POST':
         data = request.body.decode('utf-8')
         response = controller.filter_info_history(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+
+@csrf_exempt
+def delete_odds(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.delete_odds(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+
+@csrf_exempt
+def new_odds(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.new_odds(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def filter_odds(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.filter_odds(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def identification_odd(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.identification_odd(data)
+        return JsonResponse(response)
+    else:
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
+    
+@csrf_exempt
+def hacked_profile(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.hacked(data)
         return JsonResponse(response)
     else:
         response = controller.method_not_allowed()

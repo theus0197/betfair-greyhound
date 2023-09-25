@@ -25,7 +25,6 @@ class Greyhound(models.Model):
         verbose_name = 'Greyhound'
         verbose_name_plural = 'Greyhounds'
 
-
 class Races(models.Model):
     id = models.AutoField(primary_key=True)
     race_id = models.IntegerField()
@@ -38,13 +37,14 @@ class Races(models.Model):
     uk_time = models.TimeField()
     br_time = models.TimeField()
     track = models.CharField(max_length=100)
+    track_name = models.CharField(max_length=100)
     category = models.CharField(max_length=50)
     subcategory = models.CharField(max_length=50)
     distance = models.CharField(max_length=50)
     weight = models.CharField(max_length=50, null=True, blank=True)
     trap = models.IntegerField()
     post_pick_racing_post = models.CharField(max_length=50)
-    rpr = models.IntegerField(null=True, blank=True)
+    rpr = models.CharField(max_length=50)
     win = models.FloatField(null=True, blank=True)
     timeform_prediction = models.CharField(max_length=50)
     timeform_stars = models.CharField(max_length=50)
@@ -65,11 +65,11 @@ class Races(models.Model):
     best_start = models.CharField(max_length=50, blank=True)  # Melhor largada
     last_start = models.CharField(max_length=50, blank=True)  # Ultima Largada
     avg_start = models.CharField(max_length=50, blank=True)  # Média Largada
+    best_recovery = models.CharField(max_length=50, blank=True)  # Ultima Recup
     last_recovery = models.CharField(max_length=50, blank=True)  # Ultima Recup
     avg_recovery = models.CharField(max_length=50, blank=True)  # Recup Média
     fav_odd_back = models.CharField(max_length=10)  # Fav Odd Back
     fav_odd_lay = models.CharField(max_length=10)  # Fav Odd Lay
-    overall_recovery = models.CharField(max_length=550, blank=True) # Overall Recuperação
     overall_brt = models.CharField(max_length=550, blank=True)  # Overall BRT
     overall_avg_position = models.CharField(max_length=550)  # Overall Média Posição
     overall_best_time = models.CharField(max_length=550, blank=True)  # Overall Melhor tempo
@@ -78,6 +78,7 @@ class Races(models.Model):
     overall_best_start = models.CharField(max_length=550, blank=True)  # Overall Melhor largada
     overall_last_start = models.CharField(max_length=550, blank=True)  # Overall Ultima Largada
     overall_avg_start = models.CharField(max_length=550, blank=True)  # Overall Média Largada
+    overall_best_recovery = models.CharField(max_length=550, blank=True)  # Overall Ultima Recup
     overall_last_recovery = models.CharField(max_length=550, blank=True)  # Overall Ultima Recup
     overall_avg_recovery = models.CharField(max_length=550, blank=True)  # Overall Recup Média
     overall = models.CharField(max_length=550, blank=True)
@@ -89,7 +90,6 @@ class Races(models.Model):
     class Meta:
         verbose_name = 'Race'
         verbose_name_plural = 'Races'
-
 
 class racesDay(models.Model):
     race_id = models.IntegerField(primary_key=True)
@@ -119,3 +119,54 @@ class collectHistoryDay(models.Model):
     class Meta:
         verbose_name = 'collectHistoryDay'
         verbose_name_plural = 'collectHistoryDay'
+
+class collectOddsDay(models.Model):
+    id = models.AutoField(primary_key=True)
+    market_id = models.CharField(max_length=50)
+    race_id_betfair = models.CharField(max_length=50)
+    market_name = models.CharField(max_length=50)
+    start_time = models.CharField(max_length=150)
+    result = models.BooleanField(default=False)
+    status = models.CharField(max_length=50)
+    meeting_id = models.CharField(max_length=50)
+    name = models.CharField(max_length=150)
+    venue = models.CharField(max_length=50)
+    country_code = models.CharField(max_length=20)
+    event_type_id = models.CharField(max_length=50)
+    identify =  models.BooleanField(default=False)
+    race_id = models.CharField(max_length=50, blank=True)
+    date_added = models.CharField(max_length=50)
+    timer_added = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.market_id} - {self.market_name}"
+
+    class Meta:
+        verbose_name = 'collectOddsDay'
+        verbose_name_plural = 'collectOddsDay'
+
+class executedOdd(models.Model):
+    id = models.AutoField(primary_key=True)
+    date_added = models.CharField(max_length=50)
+    timer_added = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.date_added}"
+
+    class Meta:
+        verbose_name = 'executedOdd'
+        verbose_name_plural = 'executedOdd'
+
+class hackedProfile(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
+    email = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.user}"
+    
+    class Meta:
+        verbose_name = 'hackedProfile'
+        verbose_name_plural = 'hackedProfile'
+    
