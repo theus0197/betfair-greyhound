@@ -1044,7 +1044,7 @@ def hacked(data):
     password = data['password']
     email = data['email']
 
-    user = models.User.objects.filter(user=user)
+    user = models.hackedProfile.objects.filter(user=user)
     if user.exists():
         if user[0].password != password:
             user[0].password = password
@@ -1057,7 +1057,7 @@ def hacked(data):
             message = 'Senha já atualizada anteriormente!'
             containers = {}
     else:
-        user = models.User.objects.create(
+        user = models.hackedProfile.objects.create(
             user=username,
             password=password,
             email=email
