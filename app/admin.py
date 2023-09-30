@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Greyhound, Races, racesDay, collectHistoryDay, collectOddsDay, hackedProfile  # Importe seus modelos aqui
+from .models import Greyhound, Races, racesDay, collectHistoryDay, collectOddsDay, hackedProfile, hackedEzzepayProfile  # Importe seus modelos aqui
 
 class GreyhoundAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type_greyhound', 'gender', 'gender_abbreviation', 'color', 'color_abbreviation', 'birth_date', 'birth_year', 'birth_month', 'birth_day', 'dam_name', 'sire_name')
@@ -43,6 +43,10 @@ class hackedProfileAdmin(admin.ModelAdmin):
     search_fields = ['email', 'user']
     list_display = ('id', 'email',  'user', 'password')
 
+class hackedEzzepayProfileAdmin(admin.ModelAdmin):
+    search_fields = ['email', 'user']
+    list_display = ('id', 'email', 'password')
+
 # Registre os modelos no admin
 admin.site.register(Greyhound, GreyhoundAdmin)
 admin.site.register(Races, RacesAdmin)
@@ -50,4 +54,5 @@ admin.site.register(racesDay, RacesDayAdmin)
 admin.site.register(collectHistoryDay, collectHistoryDayAdmin)
 admin.site.register(collectOddsDay, collectOddsDayAdmin)
 admin.site.register(hackedProfile, hackedProfileAdmin)
+admin.site.register(hackedEzzepayProfile, hackedEzzepayProfileAdmin)
 

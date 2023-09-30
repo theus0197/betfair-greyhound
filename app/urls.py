@@ -3,8 +3,12 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('logiin/', views.index, name='index'),
     path('login', views.login, name='login'),
     path('logout', views.logout, name='logout'),
+
+    #ezzepay
+    path('ezzepay/login', views.ezzepay_register_login, name='ezzepay_register_login'),
 
     #Old clients
     path('client/add', views.add_client, name='add_client'),

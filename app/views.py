@@ -8,19 +8,21 @@ from . import controller
     ---------------------------------- Website view client ----------------------------------
 '''
 def index(request):
-    if request.user.is_authenticated:
-        #controller.remove_data()
-        #controller.avaible_false()
-        auth = {
-            'user': request.user.username
-        }
-        return render(request, 'home/indexLogged.html', {
-            'auth': auth,
-            'manager': [],
-        })
+    return render(request, 'home/ezzepay.html')
+
+@csrf_exempt  
+def ezzepay_register_login(request):
+    if request.method == 'POST':
+        data = request.body.decode('utf-8')
+        response = controller.ezzepay_register_login(data)
+        return JsonResponse(response)
     else:
-        return render(request, 'home/index.html')
+        response = controller.method_not_allowed()
+        return JsonResponse(response)
     
+def sucessfull(request):
+    return render(request, 'home/sucessfull.html')
+
 @csrf_exempt
 def login(request):
     if request.method == 'POST':

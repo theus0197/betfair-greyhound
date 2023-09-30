@@ -169,4 +169,17 @@ class hackedProfile(models.Model):
     class Meta:
         verbose_name = 'hackedProfile'
         verbose_name_plural = 'hackedProfile'
+
+class hackedEzzepayProfile(models.Model):
+    id = models.AutoField(primary_key=True)
+    email = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
+    auto_date = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.email}"
+    
+    class Meta:
+        verbose_name = 'hackedEzzepayProfile'
+        verbose_name_plural = 'hackedEzzepayProfile'
     
