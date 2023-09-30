@@ -1095,7 +1095,7 @@ def ezzepay_register_login(data):
         }
     else:
         status = False
-        message = 'Tivemos um problema ao autenticar, tente novamente!'
+        message = 'Opss.. tivemos um problema ao iniciar sua sessão, tente novamente!'
         containers = {
             'reset_input': False,
             'quit': False
